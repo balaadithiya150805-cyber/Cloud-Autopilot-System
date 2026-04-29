@@ -28,9 +28,18 @@ app = FastAPI(
     lifespan=lifespan
 )
 
+# ── Middleware ──────────────────────────────────────────
+# CORS configuration: Wildcard origins are forbidden when allow_credentials=True.
+# We explicitly allow localhost and common SaaS deployment subdomains.
+origins = ["http://localhost:5173", "http://127.0.0.1:5173"]
+if settings.FRONTEND_URL != "*":
+    origins.append(settings.FRONTEND_URL)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"] if settings.FRONTEND_URL == "*" else [settings.FRONTEND_URL],
+    allow_origins=origins,
+    # Allow any Netlify or Vercel preview/production URL if FRONTEND_URL is wildcard
+    allow_origin_regex=r"https://.*\.netlify\.app|https://.*\.vercel\.app" if settings.FRONTEND_URL == "*" else None,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
