@@ -19,6 +19,7 @@ RESEND_COOLDOWN_SECONDS = 60
 
 # ── MongoDB collection ──────────────────────────────────
 users_col = db["users"]
+sessions_col = db["sessions"]
 
 # Lazy index creation (avoids crashing import when Mongo is offline)
 _index_ensured = False
@@ -45,7 +46,11 @@ def _generate_otp(length: int = 6) -> str:
 def get_user_by_email(email: str) -> Optional[Dict]:
     """Lookup a user document by email (case-insensitive)."""
     _ensure_index()
-    return users_col.find_one({"email": email.lower()})
+    try:
+        return users_col.find_one({"email": email.lower()})
+    except Exception as e:
+        logger.warning(f"Database error in get_user_by_email: {e}")
+        return None
 
 
 def create_user(username: str, email: str, password: str) -> str:
@@ -174,6 +179,9 @@ def authenticate_user(email: str, password: str) -> Dict:
     user = get_user_by_email(email)
 
     if not user:
+        # ── Demo Mode Fallback ──
+        if email == "admin@example.com" and password == "password123":
+            return {"username": "Admin", "email": "admin@example.com"}
         raise ValueError("Invalid email or password.")
 
     if not bcrypt.verify(password, user["password_hash"]):
@@ -185,4 +193,127 @@ def authenticate_user(email: str, password: str) -> Dict:
     return {
         "username": user["username"],
         "email": user["email"],
+    }
+
+def store_refresh_token(email: str, refresh_token: str):
+    """Store the refresh token in the database as a session."""
+    if email.lower() == "admin@example.com":
+        return # Skip DB store for demo account
+        
+    expires_at = datetime.now(timezone.utc) + timedelta(days=7)
+    try:
+        sessions_col.insert_one({
+            "email": email.lower(),
+            "refresh_token": refresh_token,
+            "expires_at": expires_at
+        })
+    except Exception as e:
+        logger.warning(f"Could not store refresh token: {e}")
+
+def revoke_refresh_token(refresh_token: str):
+    """Delete the refresh token from the database."""
+    try:
+        sessions_col.delete_one({"refresh_token": refresh_token})
+    except Exception as e:
+        logger.warning(f"Could not revoke refresh token: {e}")
+
+def is_refresh_token_valid(refresh_token: str, email: str) -> bool:
+    """Check if the refresh token exists and matches the email."""
+    if email.lower() == "admin@example.com":
+        return True
+    try:
+        session = sessions_col.find_one({
+            "refresh_token": refresh_token, 
+            "email": email.lower()
+        })
+        return session is not None
+    except Exception as e:
+        logger.warning(f"Database error in is_refresh_token_valid: {e}")
+        return False
+
+
+def update_user_email(current_email: str, new_email: str, password: str) -> Dict:
+    """
+    Update user's email after verifying their password.
+    Raises ValueError on failure.
+    Returns updated safe user dict.
+    """
+    current_email = current_email.lower().strip()
+    new_email = new_email.lower().strip()
+
+    if current_email == new_email:
+        raise ValueError("New email is the same as the current email.")
+
+    user = get_user_by_email(current_email)
+    if not user:
+        raise ValueError("User not found.")
+
+    if not bcrypt.verify(password, user["password_hash"]):
+        raise ValueError("Incorrect password.")
+
+    # Check if new email is already taken
+    if get_user_by_email(new_email):
+        raise ValueError("An account with this email already exists.")
+
+    users_col.update_one(
+        {"email": current_email},
+        {"$set": {"email": new_email}}
+    )
+    logger.info(f"Email updated: {current_email} -> {new_email}")
+    return {"username": user["username"], "email": new_email}
+
+
+def change_user_password(email: str, current_password: str, new_password: str) -> bool:
+    """
+    Change user's password after verifying the current one.
+    Raises ValueError on failure.
+    """
+    email = email.lower().strip()
+    user = get_user_by_email(email)
+
+    if not user:
+        raise ValueError("User not found.")
+
+    if not bcrypt.verify(current_password, user["password_hash"]):
+        raise ValueError("Current password is incorrect.")
+
+    if len(new_password) < 6:
+        raise ValueError("New password must be at least 6 characters.")
+
+    users_col.update_one(
+        {"email": email},
+        {"$set": {"password_hash": bcrypt.hash(new_password)}}
+    )
+    logger.info(f"Password changed for: {email}")
+    return True
+
+
+def get_user_profile(email: str) -> Dict:
+    """
+    Return a safe user profile dict (no password hash or OTP).
+    Raises ValueError if user not found.
+    """
+    email = email.lower().strip()
+    
+    # ── Demo Mode Fallback ──
+    if email == "admin@example.com":
+        return {
+            "username": "Admin",
+            "email": "admin@example.com",
+            "is_verified": True,
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "has_aws_credentials": False,
+        }
+        
+    user = get_user_by_email(email)
+
+    if not user:
+        raise ValueError("User not found.")
+
+    return {
+        "username": user.get("username", ""),
+        "email": user.get("email", ""),
+        "is_verified": user.get("is_verified", False),
+        "created_at": user.get("created_at", ""),
+        "has_aws_credentials": bool(user.get("aws_access_key_id")),
     }

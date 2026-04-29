@@ -107,3 +107,35 @@ def send_otp_email(to_email: str, otp: str) -> bool:
         logger.error(f"❌ Unexpected email error to {to_email}: {type(e).__name__}: {e}")
 
     return False
+
+
+def send_email(to_email: str, subject: str, body: str) -> bool:
+    """
+    Send a generic plain-text email (used for alerts, notifications, etc.).
+    Returns True on success, False on failure. Never raises.
+    """
+    if not settings.smtp_configured:
+        logger.warning(
+            f"SMTP not configured — skipping alert email to {to_email}."
+        )
+        if settings.is_dev:
+            logger.info(f"[DEV] Alert email to {to_email}: {subject}")
+        return False
+
+    msg = MIMEText(body, "plain")
+    msg["Subject"] = subject
+    msg["From"] = settings.SMTP_USER
+    msg["To"] = to_email
+
+    try:
+        with smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT, timeout=15) as server:
+            server.ehlo()
+            server.starttls()
+            server.ehlo()
+            server.login(settings.SMTP_USER, settings.SMTP_PASSWORD)
+            server.sendmail(settings.SMTP_USER, to_email, msg.as_string())
+        logger.info(f"✅ Alert email sent to {to_email}: {subject}")
+        return True
+    except Exception as e:
+        logger.error(f"❌ Failed to send alert email to {to_email}: {type(e).__name__}: {e}")
+        return False

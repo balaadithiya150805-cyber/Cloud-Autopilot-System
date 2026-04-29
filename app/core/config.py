@@ -2,6 +2,7 @@ from pydantic_settings import BaseSettings
 from typing import Optional
 from functools import lru_cache
 import logging
+import os
 
 _config_logger = logging.getLogger("cloud_autopilot.config")
 
@@ -20,7 +21,8 @@ class Settings(BaseSettings):
 
     JWT_SECRET: str = "super-secret-key-for-dev"
     JWT_ALGORITHM: str = "HS256"
-    JWT_EXPIRATION_MINUTES: int = 1440 # 24 hours
+    JWT_EXPIRATION_MINUTES: int = 1440  # 24 hours
+    JWT_REFRESH_EXPIRATION_DAYS: int = 7
     FRONTEND_URL: str = "*"
 
     class Config:
@@ -53,5 +55,32 @@ def get_settings():
             "In dev mode, OTPs will be printed to console."
         )
     return s
+
+
+def validate_environment():
+    """Log warnings for missing/placeholder environment variables at startup."""
+    issues: list[str] = []
+
+    if settings.JWT_SECRET == "super-secret-key-for-dev":
+        issues.append("JWT_SECRET is still the default dev key — change it in .env for production.")
+
+    if not os.environ.get("ENCRYPTION_KEY"):
+        issues.append("ENCRYPTION_KEY not set — AWS credential encryption uses a temporary key.")
+
+    if not settings.MONGO_URI or settings.MONGO_URI == "mongodb://localhost:27017/":
+        issues.append("MONGO_URI is localhost — set a remote URI for production.")
+
+    if not settings.smtp_configured:
+        issues.append("SMTP credentials missing — email notifications disabled.")
+
+    if settings.FRONTEND_URL == "*":
+        issues.append("FRONTEND_URL is wildcard — restrict CORS origins in production.")
+
+    for issue in issues:
+        _config_logger.warning(f"[ENV] {issue}")
+
+    if not issues:
+        _config_logger.info("Environment validation passed — all config looks good.")
+
 
 settings = get_settings()

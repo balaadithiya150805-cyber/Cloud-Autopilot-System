@@ -28,11 +28,11 @@ def detect_anomalies(costs: List[Dict], threshold: float = 2.0) -> List[Dict]:
         else:
             z_score = abs(cost_val - mean) / stdev
             status = "anomaly" if z_score > threshold else "normal"
-            
+
         result.append({
             "date": c["date"],
             "cost": cost_val,
+            "expected_cost": round(mean, 2),
             "status": status
         })
-        
     return result

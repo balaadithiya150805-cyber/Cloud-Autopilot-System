@@ -5,6 +5,7 @@ class DailyCost(BaseModel):
     cost: float
 
 class AnomalyCost(DailyCost):
+    expected_cost: float = 0.0
     status: str
 
 class PredictionCost(BaseModel):

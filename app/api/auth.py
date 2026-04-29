@@ -2,7 +2,7 @@
 Auth API – signup, verify-otp, login, resend-otp endpoints.
 """
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel, EmailStr
 
 from app.services.auth_service import (
@@ -10,9 +10,15 @@ from app.services.auth_service import (
     verify_otp,
     authenticate_user,
     regenerate_otp,
+    store_refresh_token,
+    revoke_refresh_token,
+    is_refresh_token_valid,
+    update_user_email,
+    change_user_password,
+    get_user_profile,
 )
 from app.services.email_service import send_otp_email
-from app.core.security import create_access_token
+from app.core.security import create_access_token, create_refresh_token, verify_token, get_current_user
 from app.core.logger import logger
 
 router = APIRouter()
@@ -38,6 +44,20 @@ class LoginRequest(BaseModel):
 
 class ResendOtpRequest(BaseModel):
     email: EmailStr
+
+class RefreshRequest(BaseModel):
+    refresh_token: str
+
+class LogoutRequest(BaseModel):
+    refresh_token: str
+
+class UpdateEmailRequest(BaseModel):
+    current_password: str
+    new_email: EmailStr
+
+class ChangePasswordRequest(BaseModel):
+    current_password: str
+    new_password: str
 
 
 # ── Endpoints ───────────────────────────────────────────
@@ -97,13 +117,41 @@ def login(req: LoginRequest):
     access_token = create_access_token(
         data={"sub": user["username"], "email": user["email"]}
     )
+    refresh_token = create_refresh_token(
+        data={"sub": user["username"], "email": user["email"]}
+    )
+    
+    store_refresh_token(user["email"], refresh_token)
 
     return {
         "access_token": access_token,
+        "refresh_token": refresh_token,
         "token_type": "bearer",
         "username": user["username"],
         "email": user["email"]
     }
+
+@router.post("/refresh")
+def refresh(req: RefreshRequest):
+    """Exchange a valid refresh token for a new access token."""
+    try:
+        payload = verify_token(req.refresh_token, expected_type="refresh")
+        email = payload.get("email")
+        if not is_refresh_token_valid(req.refresh_token, email):
+            raise HTTPException(status_code=401, detail="Refresh token revoked or invalid.")
+            
+        access_token = create_access_token(
+            data={"sub": payload.get("sub"), "email": email}
+        )
+        return {"access_token": access_token, "token_type": "bearer"}
+    except Exception as e:
+        raise HTTPException(status_code=401, detail="Invalid or expired refresh token.")
+
+@router.post("/logout")
+def logout(req: LogoutRequest):
+    """Revoke the current refresh token."""
+    revoke_refresh_token(req.refresh_token)
+    return {"message": "Logged out successfully."}
 
 
 @router.post("/resend-otp")
@@ -125,3 +173,46 @@ def resend_otp(req: ResendOtpRequest):
         "message": msg,
         "email_sent": email_sent,
     }
+
+
+@router.get("/profile")
+def profile(current_user: dict = Depends(get_current_user)):
+    """Get the current user's profile info."""
+    try:
+        return get_user_profile(current_user["email"])
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+
+@router.put("/update-email")
+def update_email(req: UpdateEmailRequest, current_user: dict = Depends(get_current_user)):
+    """Update the user's email address (requires password confirmation)."""
+    try:
+        result = update_user_email(current_user["email"], req.new_email, req.current_password)
+        # Generate new tokens with updated email
+        access_token = create_access_token(
+            data={"sub": result["username"], "email": result["email"]}
+        )
+        refresh_token = create_refresh_token(
+            data={"sub": result["username"], "email": result["email"]}
+        )
+        store_refresh_token(result["email"], refresh_token)
+        return {
+            "message": "Email updated successfully.",
+            "access_token": access_token,
+            "refresh_token": refresh_token,
+            "username": result["username"],
+            "email": result["email"],
+        }
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.put("/change-password")
+def change_password(req: ChangePasswordRequest, current_user: dict = Depends(get_current_user)):
+    """Change the user's password (requires current password)."""
+    try:
+        change_user_password(current_user["email"], req.current_password, req.new_password)
+        return {"message": "Password changed successfully."}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))

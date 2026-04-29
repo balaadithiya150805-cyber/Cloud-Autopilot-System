@@ -3,6 +3,7 @@ import { AreaChart, Area, XAxis, YAxis, ResponsiveContainer, CartesianGrid, Tool
 import { fetchCosts, fetchAnomalies, fetchPredictions, fetchExplanations } from '../services/api';
 import type { DailyCost, AnomalyCost, PredictionCost, ExplanationCost } from '../services/api';
 import { DollarSign, Activity, TrendingUp, AlertTriangle, Lightbulb, Loader2 } from 'lucide-react';
+import { RecommendationCards } from './RecommendationCards';
 
 interface Props {
   ready?: boolean;
@@ -210,6 +211,9 @@ export const OverviewPage: React.FC<Props> = ({ ready = true }) => {
           )}
         </div>
       </div>
+
+      {/* Recommendations Row */}
+      <RecommendationCards ready={ready && !loading} />
     </div>
   );
 };

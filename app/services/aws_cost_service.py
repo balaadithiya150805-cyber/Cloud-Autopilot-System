@@ -2,16 +2,24 @@ import boto3
 from datetime import datetime, timedelta
 from app.core.logger import logger
 from app.core.config import settings
+from app.services.db_service import users_col
+from app.services.encryption_service import decrypt_value
 
-def get_last_7_days_aws_cost():
+def get_last_7_days_aws_cost(user_email: str):
     try:
-        # Check if AWS credentials are set (or if environment has IAM role etc)
-        # Even without explicit env vars, boto3 might work if aws cli is configured
+        user = users_col.find_one({"email": user_email.lower()})
+        if not user or not user.get("aws_access_key_id"):
+            logger.info("No AWS credentials found for user, using mock data.")
+            return get_mock_cost_data()
+
+        aws_access_key = decrypt_value(user["aws_access_key_id"])
+        aws_secret_key = decrypt_value(user["aws_secret_access_key"])
+
         client = boto3.client(
             'ce', 
             region_name=settings.AWS_DEFAULT_REGION,
-            aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-            aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY
+            aws_access_key_id=aws_access_key,
+            aws_secret_access_key=aws_secret_key
         )
         
         end_date = datetime.utcnow().date()
@@ -35,11 +43,11 @@ def get_last_7_days_aws_cost():
                 "cost": round(cost_amount, 2)
             })
             
-        logger.info("Successfully fetched AWS costs from Cost Explorer.")
+        logger.info(f"Successfully fetched AWS costs for {user_email}.")
         return costs
 
     except Exception as e:
-        logger.warning(f"Failed to fetch AWS costs: {str(e)}. Using fallback mock data.")
+        logger.warning(f"Failed to fetch AWS costs for {user_email}: {str(e)}. Using fallback mock data.")
         return get_mock_cost_data()
 
 def get_mock_cost_data():

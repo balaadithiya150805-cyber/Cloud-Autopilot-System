@@ -11,9 +11,10 @@ import {
   Settings,
   LogOut,
   User,
+  Zap,
 } from 'lucide-react';
 
-export type TabId = 'dashboard' | 'overview' | 'costs' | 'anomalies' | 'predictions' | 'explanations' | 'reports' | 'alerts' | 'settings';
+export type TabId = 'dashboard' | 'overview' | 'costs' | 'anomalies' | 'predictions' | 'explanations' | 'recommendations' | 'reports' | 'alerts' | 'settings';
 
 interface SidebarProps {
   activeTab: TabId;
@@ -30,13 +31,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onLog
     { id: 'anomalies', label: 'Anomalies', icon: <AlertTriangle className="w-5 h-5" /> },
     { id: 'predictions', label: 'Predictions', icon: <TrendingUp className="w-5 h-5" /> },
     { id: 'explanations', label: 'Explanations', icon: <Lightbulb className="w-5 h-5" /> },
+    { id: 'recommendations', label: 'Recommendations', icon: <Zap className="w-5 h-5" /> },
     { id: 'reports', label: 'Reports', icon: <FileText className="w-5 h-5" /> },
     { id: 'alerts', label: 'Alerts', icon: <Bell className="w-5 h-5" /> },
     { id: 'settings', label: 'Settings', icon: <Settings className="w-5 h-5" /> },
   ];
 
   return (
-    <aside className="w-64 flex-shrink-0 bg-white dark:bg-gray-900 border-r border-slate-200 dark:border-gray-800 hidden md:flex md:flex-col overflow-y-auto">
+    <aside className="w-64 flex-shrink-0 bg-white/60 dark:bg-gray-900/60 backdrop-blur-md border-r border-white/20 dark:border-gray-800/50 hidden md:flex md:flex-col overflow-y-auto">
       <div className="p-4 flex-1">
         <div className="space-y-1 mt-4">
           {tabs.map((tab) => {

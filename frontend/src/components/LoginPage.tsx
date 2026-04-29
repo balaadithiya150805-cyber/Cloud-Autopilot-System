@@ -93,7 +93,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
     setIsLoading(true);
     try {
       const user = await login(email, password);
-      onLogin({ username: user.username, email: user.email, access_token: user.access_token });
+      onLogin({ username: user.username, email: user.email, access_token: user.access_token, refresh_token: user.refresh_token });
     } catch (err) {
       setError(getErrorMsg(err));
     } finally {
@@ -191,7 +191,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
 
   /* ── render ─────────────────────────────────────────────── */
   return (
-    <div className="relative flex items-center justify-center min-h-screen overflow-hidden bg-gradient-to-br from-slate-100 via-blue-50 to-indigo-100 dark:from-gray-950 dark:via-gray-900 dark:to-indigo-950 transition-colors duration-500">
+    <div className="relative flex items-center justify-center min-h-screen overflow-hidden bg-theme-mesh transition-colors duration-500">
       {/* ─── animated background ─── */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {particles.map((p) => (

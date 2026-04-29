@@ -3,20 +3,23 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.api.costs import router as costs_router
 from app.api.auth import router as auth_router
-from app.core.config import settings
+from app.core.config import settings, validate_environment
 from app.core.logger import logger
-from app.services.db_service import client
+from app.services.db_service import client, init_db
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info(f"Starting {settings.PROJECT_NAME}...")
+    validate_environment()
     try:
-        client.admin.command('ping')
-        logger.info("Successfully connected to MongoDB.")
+        init_db()
     except Exception as e:
-        logger.warning(f"MongoDB connection failed: {e}")
+        logger.error(f"MongoDB initialization failed: {e} — running in degraded mode.")
     yield
-    client.close()
+    try:
+        client.close()
+    except Exception:
+        pass
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -27,7 +30,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[settings.FRONTEND_URL] if settings.FRONTEND_URL != "*" else ["*"],
+    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"] if settings.FRONTEND_URL == "*" else [settings.FRONTEND_URL],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
