@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { DollarSign, TrendingUp, Activity } from 'lucide-react';
+import { DollarSign, TrendingUp, Activity, Database } from 'lucide-react';
 import { fetchCosts } from '../services/api';
 
 interface Props {
   ready?: boolean;
+  dataLength?: number;
 }
 
-export const KPICards: React.FC<Props> = ({ ready = true }) => {
+export const KPICards: React.FC<Props> = ({ ready = true, dataLength = 0 }) => {
   const [loading, setLoading] = useState(true);
   const [metrics, setMetrics] = useState({
     total: 0,
@@ -62,12 +63,18 @@ export const KPICards: React.FC<Props> = ({ ready = true }) => {
         value: `$${metrics.maxSpike.toFixed(2)}`,
         icon: <TrendingUp className="w-5 h-5 text-orange-600 dark:text-orange-400" />,
         color: "bg-orange-100 dark:bg-orange-900/40"
+      },
+      {
+        title: "Total Records",
+        value: dataLength.toString(),
+        icon: <Database className="w-5 h-5 text-violet-600 dark:text-violet-400" />,
+        color: "bg-violet-100 dark:bg-violet-900/40"
       }
     ];
 
   if (loading || !ready) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {[1, 2, 3].map((i) => (
           <div key={i} className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md border border-slate-200 dark:border-gray-700 flex items-center justify-between">
             <div className="space-y-3">
@@ -82,7 +89,7 @@ export const KPICards: React.FC<Props> = ({ ready = true }) => {
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
       {cards.map((card, idx) => (
         <div key={idx} className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md border border-slate-200 dark:border-gray-700 flex items-center justify-between transition hover:scale-[1.02] hover:shadow-lg cursor-default">
           <div>

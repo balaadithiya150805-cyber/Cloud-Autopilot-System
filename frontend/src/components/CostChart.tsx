@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { fetchCosts } from '../services/api';
 import type { DailyCost } from '../services/api';
-import { Loader2, AlertCircle } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 
 export const CostChart: React.FC = () => {
   const [data, setData] = useState<DailyCost[]>([]);
@@ -68,7 +68,7 @@ export const CostChart: React.FC = () => {
               <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748B', fontSize: 12}} tickFormatter={(val) => `$${val}`} />
               <Tooltip 
                 contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)' }}
-                formatter={(value: number) => [`$${(value ?? 0).toFixed(2)}`, 'Cost']}
+                formatter={(value: any) => [`$${(Number(value) ?? 0).toFixed(2)}`, 'Cost']}
               />
               <Legend iconType="circle" wrapperStyle={{ fontSize: '14px', paddingTop: '10px' }} />
               <Area type="monotone" dataKey="cost" name="Actual Cost" stroke="#3B82F6" fillOpacity={1} fill="url(#colorCost)" strokeWidth={3} activeDot={{ r: 6, strokeWidth: 0 }} />

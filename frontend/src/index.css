@@ -15,11 +15,11 @@
 }
 
 .dark .recharts-cartesian-grid line {
-  stroke: #374151;
+  stroke: #374151 !important;
 }
 
 .dark .recharts-text {
-  fill: #9ca3af;
+  fill: #9ca3af !important;
 }
 
 .dark .recharts-tooltip-wrapper .recharts-default-tooltip {

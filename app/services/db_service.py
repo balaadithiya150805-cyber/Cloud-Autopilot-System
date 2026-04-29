@@ -1,20 +1,30 @@
+import time
 from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure, ServerSelectionTimeoutError
 from app.core.config import settings
 from app.core.logger import logger
 from typing import List, Dict
 
-client = MongoClient(settings.MONGO_URI, serverSelectionTimeoutMS=2000)
+client = MongoClient(settings.MONGO_URI, serverSelectionTimeoutMS=500, connectTimeoutMS=500, socketTimeoutMS=1000)
 db = client[settings.MONGO_DB_NAME]
 cloud_costs_col = db["cloud_costs"]
 
+# Cache the DB availability result so we don't ping on every request
+_db_available_cache: dict = {"available": False, "checked_at": 0.0}
+_DB_CACHE_TTL = 30  # seconds
+
 def _is_db_available() -> bool:
-    """Quick ping to check if MongoDB is reachable."""
+    """Quick ping to check if MongoDB is reachable. Caches result for 30s."""
+    now = time.time()
+    if now - _db_available_cache["checked_at"] < _DB_CACHE_TTL:
+        return _db_available_cache["available"]
     try:
         client.admin.command('ping')
-        return True
+        _db_available_cache["available"] = True
     except (ConnectionFailure, ServerSelectionTimeoutError):
-        return False
+        _db_available_cache["available"] = False
+    _db_available_cache["checked_at"] = now
+    return _db_available_cache["available"]
 
 def store_cloud_costs(costs: List[Dict], source: str):
     """

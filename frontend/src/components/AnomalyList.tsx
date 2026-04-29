@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { fetchAnomalies } from '../services/api';
 import type { AnomalyCost } from '../services/api';
-import { AlertTriangle, CheckCircle2, Loader2, AlertCircle } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, AlertCircle } from 'lucide-react';
 
 interface Props {
   ready?: boolean;

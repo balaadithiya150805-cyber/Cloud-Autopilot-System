@@ -10,6 +10,8 @@ class AnomalyCost(DailyCost):
 class PredictionCost(BaseModel):
     date: str
     predicted_cost: float
+    lower_bound: float | None = None
+    upper_bound: float | None = None
 
 class ExplanationCost(AnomalyCost):
     reason: str | None = None

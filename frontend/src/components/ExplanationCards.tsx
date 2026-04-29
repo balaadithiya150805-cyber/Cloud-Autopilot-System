@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { fetchExplanations } from '../services/api';
 import type { ExplanationCost } from '../services/api';
-import { Lightbulb, Info, Loader2, AlertCircle } from 'lucide-react';
+import { Lightbulb, Info, AlertCircle } from 'lucide-react';
 
 interface Props {
   ready?: boolean;

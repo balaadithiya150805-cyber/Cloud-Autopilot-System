@@ -48,9 +48,16 @@ def predict_costs(costs: List[Dict], days_ahead: int = 7) -> List[Dict]:
         # Avoid negative costs
         predicted_cost = max(0.0, round(float(predicted_val), 2))
         
+        # Simple +/- 10% confidence interval
+        margin = predicted_cost * 0.10
+        lower_bound = max(0.0, round(predicted_cost - margin, 2))
+        upper_bound = round(predicted_cost + margin, 2)
+        
         predictions.append({
             "date": target_date.strftime("%Y-%m-%d"),
-            "predicted_cost": predicted_cost
+            "predicted_cost": predicted_cost,
+            "lower_bound": lower_bound,
+            "upper_bound": upper_bound
         })
         
     return predictions
@@ -58,10 +65,17 @@ def predict_costs(costs: List[Dict], days_ahead: int = 7) -> List[Dict]:
 def _generate_constant_predictions(last_date_str: str, cost: float, days_ahead: int) -> List[Dict]:
     last_date = datetime.strptime(last_date_str, "%Y-%m-%d")
     predictions = []
+    
+    margin = cost * 0.10
+    lower_bound = max(0.0, round(cost - margin, 2))
+    upper_bound = round(cost + margin, 2)
+    
     for i in range(1, days_ahead + 1):
         target_date = last_date + timedelta(days=i)
         predictions.append({
             "date": target_date.strftime("%Y-%m-%d"),
-            "predicted_cost": round(cost, 2)
+            "predicted_cost": round(cost, 2),
+            "lower_bound": lower_bound,
+            "upper_bound": upper_bound
         })
     return predictions

@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from typing import List
 from app.models.cost_model import DailyCost, AnomalyCost, PredictionCost, ExplanationCost
 from app.services.aws_cost_service import get_last_7_days_aws_cost
@@ -6,8 +6,9 @@ from app.services.db_service import store_cloud_costs, get_cloud_costs_by_source
 from app.services.anomaly_service import detect_anomalies
 from app.services.prediction_service import predict_costs
 from app.services.explanation_service import explain_anomalies
+from app.core.security import get_current_user
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(get_current_user)])
 
 def _get_aws_costs_with_fallback() -> list:
     """Try DB first, fall back to fresh fetch if DB is empty/unavailable."""

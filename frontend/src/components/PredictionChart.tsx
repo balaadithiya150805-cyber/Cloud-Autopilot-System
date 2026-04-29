@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { fetchPredictions } from '../services/api';
 import type { PredictionCost } from '../services/api';
-import { Loader2, AlertCircle } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 
 interface Props {
   ready?: boolean;
@@ -61,7 +61,7 @@ export const PredictionChart: React.FC<Props> = ({ ready = true }) => {
       {!loading && !error && (
         <div className="h-64">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={data}>
+            <AreaChart data={data.map(d => ({ ...d, confidence: [d.lower_bound || d.predicted_cost, d.upper_bound || d.predicted_cost] }))}>
               <defs>
                 <linearGradient id="colorPredict" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#8B5CF6" stopOpacity={0.3}/>
@@ -73,10 +73,14 @@ export const PredictionChart: React.FC<Props> = ({ ready = true }) => {
               <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748B', fontSize: 12}} tickFormatter={(val) => `$${val}`} />
               <Tooltip 
                 contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                formatter={(value: number) => [`$${(value ?? 0).toFixed(2)}`, 'Predicted']}
+                formatter={(value: any, name: any) => {
+                  if (name === 'confidence') return null as any; // hide confidence array from tooltip
+                  return [`$${(Number(value) ?? 0).toFixed(2)}`, 'Predicted'];
+                }}
               />
               <Legend iconType="circle" wrapperStyle={{ fontSize: '14px', paddingTop: '10px' }} />
-              <Area type="monotone" dataKey="predicted_cost" name="Predicted Cost" stroke="#8B5CF6" fillOpacity={1} fill="url(#colorPredict)" strokeWidth={3} strokeDasharray="5 5" activeDot={{ r: 6, strokeWidth: 0 }} />
+              <Area type="monotone" dataKey="confidence" name="confidence" stroke="none" fill="#8B5CF6" fillOpacity={0.15} activeDot={false} legendType="none" tooltipType="none" />
+              <Area type="monotone" dataKey="predicted_cost" name="Predicted Cost" stroke="#8B5CF6" fillOpacity={0} fill="url(#colorPredict)" strokeWidth={3} strokeDasharray="5 5" activeDot={{ r: 6, strokeWidth: 0 }} />
             </AreaChart>
           </ResponsiveContainer>
         </div>
