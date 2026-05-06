@@ -89,22 +89,22 @@ def send_otp_email(to_email: str, otp: str) -> bool:
             server.login(settings.SMTP_USER, settings.SMTP_PASSWORD)
             server.sendmail(settings.SMTP_USER, to_email, msg.as_string())
 
-        logger.info(f"✅ OTP email sent successfully to {to_email}")
+        logger.info(f"[SUCCESS] OTP email sent successfully to {to_email}")
         return True
 
     except smtplib.SMTPAuthenticationError as e:
         logger.error(
-            f"❌ SMTP auth failed for {settings.SMTP_USER}: {e}. "
+            f"[ERROR] SMTP auth failed for {settings.SMTP_USER}: {e}. "
             "Check SMTP_USER and SMTP_PASSWORD in .env (use Gmail App Password)."
         )
     except smtplib.SMTPConnectError as e:
-        logger.error(f"❌ Cannot connect to SMTP server {settings.SMTP_HOST}:{settings.SMTP_PORT}: {e}")
+        logger.error(f"[ERROR] Cannot connect to SMTP server {settings.SMTP_HOST}:{settings.SMTP_PORT}: {e}")
     except smtplib.SMTPException as e:
-        logger.error(f"❌ SMTP error sending to {to_email}: {e}")
+        logger.error(f"[ERROR] SMTP error sending to {to_email}: {e}")
     except TimeoutError:
-        logger.error(f"❌ SMTP connection to {settings.SMTP_HOST}:{settings.SMTP_PORT} timed out.")
+        logger.error(f"[ERROR] SMTP connection to {settings.SMTP_HOST}:{settings.SMTP_PORT} timed out.")
     except Exception as e:
-        logger.error(f"❌ Unexpected email error to {to_email}: {type(e).__name__}: {e}")
+        logger.error(f"[ERROR] Unexpected email error to {to_email}: {type(e).__name__}: {e}")
 
     return False
 
@@ -134,8 +134,8 @@ def send_email(to_email: str, subject: str, body: str) -> bool:
             server.ehlo()
             server.login(settings.SMTP_USER, settings.SMTP_PASSWORD)
             server.sendmail(settings.SMTP_USER, to_email, msg.as_string())
-        logger.info(f"✅ Alert email sent to {to_email}: {subject}")
+        logger.info(f"[SUCCESS] Alert email sent to {to_email}: {subject}")
         return True
     except Exception as e:
-        logger.error(f"❌ Failed to send alert email to {to_email}: {type(e).__name__}: {e}")
+        logger.error(f"[ERROR] Failed to send alert email to {to_email}: {type(e).__name__}: {e}")
         return False
