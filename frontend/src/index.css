@@ -25,7 +25,11 @@
 }
 
 @layer base {
+  html {
+    scroll-behavior: smooth;
+  }
   body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
     @apply bg-slate-50 text-slate-900 dark:bg-gray-900 dark:text-gray-100 transition-colors duration-300;
   }
 }
@@ -36,6 +40,7 @@
   transition-duration: 300ms;
 }
 
+/* ── Recharts dark mode ─────────────────────────────────── */
 .dark .recharts-cartesian-grid line {
   stroke: #374151 !important;
 }
@@ -49,3 +54,47 @@
   border-color: #374151 !important;
   color: #f3f4f6 !important;
 }
+
+/* ── Toast animation ────────────────────────────────────── */
+@keyframes toast-in {
+  0% {
+    opacity: 0;
+    transform: translateX(100%) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+.animate-toast-in {
+  animation: toast-in 0.3s cubic-bezier(0.21, 1.02, 0.73, 1) forwards;
+}
+
+/* ── Custom scrollbar ───────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #374151;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #4b5563;
+}
+

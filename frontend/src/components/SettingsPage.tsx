@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Settings as SettingsIcon, Sun, Moon, Bell, BellOff, Sliders, Save, CheckCircle2, Cloud, ShieldCheck, Mail, Lock, Loader2, AlertCircle, User } from 'lucide-react';
 import { connectAWS, fetchProfile, updateEmail, changePassword } from '../services/api';
 import type { UserProfile } from '../services/api';
+import { useToast } from './ToastProvider';
 
 interface AppSettings {
   anomalyThreshold: number;
@@ -41,6 +42,7 @@ interface Props {
 type FeedbackMsg = { type: 'success' | 'error'; text: string } | null;
 
 export const SettingsPage: React.FC<Props> = ({ theme, onThemeChange }) => {
+  const { toast } = useToast();
   const [settings, setSettings] = useState<AppSettings>(loadSettings);
   const [saved, setSaved] = useState(false);
 
@@ -95,6 +97,7 @@ export const SettingsPage: React.FC<Props> = ({ theme, onThemeChange }) => {
     onThemeChange(settings.theme);
     localStorage.setItem('theme', settings.theme);
     setSaved(true);
+    toast('success', 'Preferences saved successfully!');
     setTimeout(() => setSaved(false), 2000);
   };
 
@@ -115,6 +118,7 @@ export const SettingsPage: React.FC<Props> = ({ theme, onThemeChange }) => {
     try {
       await connectAWS(awsKey, awsSecret);
       setAwsMessage({ type: 'success', text: 'AWS credentials securely connected!' });
+      toast('success', 'AWS credentials connected successfully!');
       setAwsKey('');
       setAwsSecret('');
       // Refresh profile to update AWS status
@@ -153,6 +157,7 @@ export const SettingsPage: React.FC<Props> = ({ theme, onThemeChange }) => {
         localStorage.setItem('authUser', JSON.stringify(parsed));
       }
       setEmailMsg({ type: 'success', text: 'Email updated successfully! Tokens refreshed.' });
+      toast('success', 'Email address updated successfully!');
       setEmailPassword('');
       setNewEmail('');
       try { const p = await fetchProfile(); setProfile(p); } catch {}
@@ -179,6 +184,7 @@ export const SettingsPage: React.FC<Props> = ({ theme, onThemeChange }) => {
     try {
       await changePassword(currentPwd, newPwd);
       setPwdMsg({ type: 'success', text: 'Password changed successfully!' });
+      toast('success', 'Password changed successfully!');
       setCurrentPwd('');
       setNewPwd('');
       setConfirmPwd('');

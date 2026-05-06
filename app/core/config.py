@@ -24,6 +24,7 @@ class Settings(BaseSettings):
     JWT_EXPIRATION_MINUTES: int = 1440  # 24 hours
     JWT_REFRESH_EXPIRATION_DAYS: int = 7
     FRONTEND_URL: str = "*"
+    RATE_LIMIT_PER_MINUTE: int = 10
 
     class Config:
         env_file = ".env"

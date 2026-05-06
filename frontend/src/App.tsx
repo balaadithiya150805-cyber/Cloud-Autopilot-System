@@ -12,6 +12,7 @@ import { SettingsPage } from './components/SettingsPage';
 import { AlertsPage } from './components/AlertsPage';
 import { RecommendationCards } from './components/RecommendationCards';
 import { LoginPage } from './components/LoginPage';
+import { HomePage } from './components/HomePage';
 import { fetchCosts } from './services/api';
 import type { DailyCost, AuthUser } from './services/api';
 import { ShieldCheck, Loader2, Sun, Moon, Menu } from 'lucide-react';
@@ -22,6 +23,7 @@ function App() {
     const stored = localStorage.getItem('authUser');
     return stored ? JSON.parse(stored) : null;
   });
+  const [showLogin, setShowLogin] = useState(false);
 
   const handleLogin = (u: AuthUser) => {
     setUser(u);
@@ -44,6 +46,7 @@ function App() {
       }
     }
     setUser(null);
+    setShowLogin(false);
     localStorage.removeItem('authUser');
     localStorage.removeItem('token');
     localStorage.removeItem('refreshToken');
@@ -107,9 +110,25 @@ function App() {
     setMobileMenuOpen(false);
   };
 
-  /* ── if not authenticated, show login page ──────────────── */
+  /* ── if not authenticated ────────────────────────────────── */
   if (!user) {
-    return <LoginPage onLogin={handleLogin} />;
+    // Show login page if user clicked "Get Started"
+    if (showLogin) {
+      return (
+        <LoginPage
+          onLogin={handleLogin}
+          onBack={() => setShowLogin(false)}
+        />
+      );
+    }
+    // Otherwise show the landing page
+    return (
+      <HomePage
+        onGetStarted={() => setShowLogin(true)}
+        theme={theme}
+        toggleTheme={toggleTheme}
+      />
+    );
   }
 
   const renderContent = () => {

@@ -3,7 +3,7 @@ services:
     name: cloud-autopilot-backend
     env: python
     buildCommand: pip install --no-cache-dir -r requirements.txt
-    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    startCommand: python -m uvicorn app.main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
@@ -23,3 +23,6 @@ services:
         value: production
       - key: FRONTEND_URL
         sync: false
+      - key: ENCRYPTION_KEY
+        sync: false
+

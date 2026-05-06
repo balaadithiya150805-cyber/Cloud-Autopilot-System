@@ -13,7 +13,9 @@ import {
   Moon,
   Loader2,
   KeyRound,
+  ArrowLeft,
 } from 'lucide-react';
+import { useToast } from './ToastProvider';
 
 type AuthView = 'login' | 'signup' | 'verify';
 
@@ -21,9 +23,12 @@ import type { AuthUser } from '../services/api';
 
 interface LoginPageProps {
   onLogin: (user: AuthUser) => void;
+  onBack?: () => void;
 }
 
-export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
+export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onBack }) => {
+  const { toast } = useToast();
+
   /* ── state ─────────────────────────────────────────────── */
   const [view, setView] = useState<AuthView>('login');
   const [showPassword, setShowPassword] = useState(false);
@@ -114,6 +119,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
     try {
       await signup(username, email, password);
       setError('');
+      toast('success', 'Account created! Check your email for the verification code.');
       setView('verify');
     } catch (err) {
       setError(getErrorMsg(err));
@@ -132,6 +138,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
     setIsLoading(true);
     try {
       await verifyOtp(email, code);
+      toast('success', 'Email verified successfully! Please sign in.');
       setSuccessMsg('Email verified! Please sign in.');
       setView('login');
       setPassword('');
@@ -148,6 +155,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
     setIsLoading(true);
     try {
       await resendOtp(email);
+      toast('info', 'A new verification code has been sent to your email.');
       setSuccessMsg('A new code has been sent to your email.');
     } catch (err) {
       setError(getErrorMsg(err));
@@ -608,7 +616,16 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
         </div>
 
         {/* ─── footer ─── */}
-        <p className="mt-6 text-center text-xs text-slate-400 dark:text-gray-600">
+        {onBack && (
+          <button
+            onClick={onBack}
+            className="mt-4 mx-auto flex items-center gap-2 text-sm font-medium text-slate-400 dark:text-gray-500 hover:text-slate-600 dark:hover:text-gray-300 transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to Home
+          </button>
+        )}
+        <p className="mt-4 text-center text-xs text-slate-400 dark:text-gray-600">
           © 2026 Cloud Autopilot System · AI-Powered Cloud Intelligence
         </p>
       </div>
