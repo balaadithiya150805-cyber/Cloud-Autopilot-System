@@ -245,22 +245,26 @@ function App() {
       {/* Main Container */}
       <div className="flex-1 flex flex-col overflow-hidden relative z-10">
         {/* Header */}
-        <header className="h-16 flex-shrink-0 flex items-center justify-between px-6 border-b border-white/20 dark:border-gray-800/50 bg-white/60 dark:bg-gray-900/60 backdrop-blur-md">
-          <div className="flex items-center gap-3">
+        <header className="h-24 flex-shrink-0 flex items-center justify-between px-6 border-b border-white/20 dark:border-gray-800/50 bg-white/60 dark:bg-gray-900/60 backdrop-blur-md relative">
+          <div className="flex items-center gap-3 w-1/3">
             <button 
               className="md:hidden p-2 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-gray-800"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             >
               <Menu className="w-5 h-5" />
             </button>
-            <img src="/logo.png" alt="Logo" className="w-10 h-10 object-contain hidden sm:block drop-shadow-sm" />
-            <div>
-              <h1 className="text-lg md:text-xl font-bold text-slate-800 dark:text-gray-100 tracking-tight">Cloud Autopilot System</h1>
-              <p className="text-xs text-slate-500 dark:text-gray-400 hidden sm:block">AI-powered cloud cost monitoring & anomaly detection</p>
+            <div className="hidden sm:block">
+              <h1 className="text-lg md:text-xl font-bold text-slate-800 dark:text-gray-100 tracking-tight">Cloud Autopilot</h1>
+              <p className="text-xs text-slate-500 dark:text-gray-400">Monitoring System</p>
             </div>
           </div>
           
-          <div className="flex items-center gap-3">
+          {/* Centered Brand Logo */}
+          <div className="absolute left-1/2 -translate-x-1/2 flex items-center justify-center">
+            <img src="/logo.png" alt="Logo" className="w-20 h-20 object-contain drop-shadow-sm hover:scale-105 transition-transform duration-300" />
+          </div>
+          
+          <div className="flex items-center justify-end gap-3 w-1/3">
             <button
               onClick={toggleTheme}
               className="p-2 rounded-lg bg-slate-100 dark:bg-gray-800 text-slate-700 dark:text-gray-300 hover:bg-slate-200 dark:hover:bg-gray-700 transition"

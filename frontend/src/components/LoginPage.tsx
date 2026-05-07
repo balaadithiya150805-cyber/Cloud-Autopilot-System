@@ -240,8 +240,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onBack }) => {
           {/* ─── header ─── */}
           <div className="relative px-8 pt-10 pb-6 text-center">
             {/* Logo */}
-            <div className="inline-flex items-center justify-center w-24 h-24 mb-2">
-              <img src="/logo.png" alt="Logo" className="w-full h-full object-contain drop-shadow-md" />
+            <div className="inline-flex items-center justify-center w-32 h-32 mb-4">
+              <img src="/logo.png" alt="Logo" className="w-full h-full object-contain drop-shadow-lg hover:scale-105 transition-transform duration-300" />
             </div>
 
             <h1 className="text-2xl font-bold text-slate-800 dark:text-white tracking-tight">

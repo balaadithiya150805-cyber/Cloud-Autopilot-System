@@ -100,12 +100,17 @@ export const HomePage: React.FC<HomePageProps> = ({ onGetStarted, theme, toggleT
     <div className="min-h-screen bg-white dark:bg-gray-950 text-slate-900 dark:text-gray-100 overflow-x-hidden transition-colors duration-500">
       {/* ─── Navigation ─── */}
       <nav className="fixed top-0 inset-x-0 z-50 bg-white/80 dark:bg-gray-950/80 backdrop-blur-lg border-b border-slate-200/60 dark:border-gray-800/60">
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <img src="/logo.png" alt="Logo" className="w-10 h-10 object-contain drop-shadow-sm" />
-            <span className="text-lg font-bold tracking-tight">Cloud Autopilot</span>
+        <div className="max-w-7xl mx-auto px-6 h-24 flex items-center justify-between relative">
+          <div className="flex items-center w-1/3">
+            {/* Left side empty space to balance the layout */}
           </div>
-          <div className="flex items-center gap-3">
+          
+          <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-3">
+            <img src="/logo.png" alt="Logo" className="w-20 h-20 object-contain drop-shadow-sm hover:scale-105 transition-transform duration-300" />
+            <span className="text-xl font-bold tracking-tight">Cloud Autopilot</span>
+          </div>
+
+          <div className="flex items-center justify-end gap-3 w-1/3">
             <button
               onClick={toggleTheme}
               className="p-2 rounded-lg bg-slate-100 dark:bg-gray-800 text-slate-700 dark:text-gray-300 hover:bg-slate-200 dark:hover:bg-gray-700 transition"
