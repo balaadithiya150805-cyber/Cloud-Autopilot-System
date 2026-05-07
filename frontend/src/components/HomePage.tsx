@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  ShieldCheck,
   TrendingUp,
   Zap,
   BarChart3,
@@ -103,9 +102,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onGetStarted, theme, toggleT
       <nav className="fixed top-0 inset-x-0 z-50 bg-white/80 dark:bg-gray-950/80 backdrop-blur-lg border-b border-slate-200/60 dark:border-gray-800/60">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="bg-gradient-to-br from-orange-500 to-amber-600 p-2 rounded-xl shadow-md">
-              <ShieldCheck className="w-5 h-5 text-white" />
-            </div>
+            <img src="/logo.png" alt="Logo" className="w-10 h-10 object-contain drop-shadow-sm" />
             <span className="text-lg font-bold tracking-tight">Cloud Autopilot</span>
           </div>
           <div className="flex items-center gap-3">
@@ -357,9 +354,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onGetStarted, theme, toggleT
       <footer className="py-8 border-t border-slate-200 dark:border-gray-800">
         <div className="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <div className="bg-gradient-to-br from-orange-500 to-amber-600 p-1.5 rounded-lg">
-              <ShieldCheck className="w-4 h-4 text-white" />
-            </div>
+            <img src="/logo.png" alt="Logo" className="w-6 h-6 object-contain drop-shadow-sm" />
             <span className="text-sm font-semibold">Cloud Autopilot</span>
           </div>
           <p className="text-xs text-slate-500 dark:text-gray-500">

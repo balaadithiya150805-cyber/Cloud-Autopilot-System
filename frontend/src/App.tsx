@@ -15,7 +15,7 @@ import { LoginPage } from './components/LoginPage';
 import { HomePage } from './components/HomePage';
 import { fetchCosts } from './services/api';
 import type { DailyCost, AuthUser } from './services/api';
-import { ShieldCheck, Loader2, Sun, Moon, Menu } from 'lucide-react';
+import { Loader2, Sun, Moon, Menu } from 'lucide-react';
 
 function App() {
   /* ── auth state ─────────────────────────────────────────── */
@@ -148,8 +148,8 @@ function App() {
           return (
             <div className="p-6 md:p-10 max-w-3xl mx-auto w-full">
               <div className="flex flex-col items-center justify-center py-20 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-slate-200 dark:border-gray-700 border-dashed">
-                <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/40 rounded-2xl flex items-center justify-center mb-6">
-                  <ShieldCheck className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+                <div className="w-20 h-20 mb-6 mx-auto">
+                  <img src="/logo.png" alt="Logo" className="w-full h-full object-contain drop-shadow-md" />
                 </div>
                 <h3 className="text-xl font-bold text-slate-800 dark:text-gray-100 mb-2">No Cost Data Yet</h3>
                 <p className="text-sm text-slate-500 dark:text-gray-400 max-w-md text-center mb-6">
@@ -253,9 +253,7 @@ function App() {
             >
               <Menu className="w-5 h-5" />
             </button>
-            <div className="bg-blue-600 p-2 rounded-xl shadow-md hidden sm:block">
-              <ShieldCheck className="w-5 h-5 text-white" />
-            </div>
+            <img src="/logo.png" alt="Logo" className="w-10 h-10 object-contain hidden sm:block drop-shadow-sm" />
             <div>
               <h1 className="text-lg md:text-xl font-bold text-slate-800 dark:text-gray-100 tracking-tight">Cloud Autopilot System</h1>
               <p className="text-xs text-slate-500 dark:text-gray-400 hidden sm:block">AI-powered cloud cost monitoring & anomaly detection</p>

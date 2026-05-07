@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { signup, login, verifyOtp, resendOtp } from '../services/api';
 import {
-  ShieldCheck,
   Mail,
   Lock,
   User,
@@ -241,8 +240,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onBack }) => {
           {/* ─── header ─── */}
           <div className="relative px-8 pt-10 pb-6 text-center">
             {/* Logo */}
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 shadow-lg shadow-blue-500/30 mb-5">
-              <ShieldCheck className="w-8 h-8 text-white" />
+            <div className="inline-flex items-center justify-center w-24 h-24 mb-2">
+              <img src="/logo.png" alt="Logo" className="w-full h-full object-contain drop-shadow-md" />
             </div>
 
             <h1 className="text-2xl font-bold text-slate-800 dark:text-white tracking-tight">
