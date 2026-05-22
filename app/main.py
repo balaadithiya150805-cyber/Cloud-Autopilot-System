@@ -43,14 +43,20 @@ app = FastAPI(
 app.add_middleware(RequestLoggingMiddleware)
 
 # 2. CORS
-origins = ["http://localhost:5173", "http://127.0.0.1:5173"]
-if settings.FRONTEND_URL != "*":
-    origins.append(settings.FRONTEND_URL)
+origins = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "https://bucolic-caramel-25cf7f.netlify.app",
+]
+if settings.FRONTEND_URL not in ("*", ""):
+    # Strip trailing slash to avoid mismatch
+    origins.append(settings.FRONTEND_URL.rstrip("/"))
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
-    allow_origin_regex=r"https://.*\.netlify\.app|https://.*\.vercel\.app" if settings.FRONTEND_URL == "*" else None,
+    # Always allow any *.netlify.app and *.vercel.app origins
+    allow_origin_regex=r"https://.*\.netlify\.app|https://.*\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

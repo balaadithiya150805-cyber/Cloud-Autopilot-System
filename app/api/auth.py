@@ -3,6 +3,7 @@ Auth API – signup, verify-otp, login, resend-otp endpoints.
 """
 
 from fastapi import APIRouter, HTTPException, Depends
+from pymongo.errors import ConnectionFailure, ServerSelectionTimeoutError
 from pydantic import BaseModel, EmailStr
 
 from app.services.auth_service import (
@@ -68,13 +69,23 @@ def signup(req: SignupRequest):
     # Validation
     if len(req.username.strip()) < 2:
         raise HTTPException(status_code=400, detail="Username must be at least 2 characters.")
-    if len(req.password) < 6:
-        raise HTTPException(status_code=400, detail="Password must be at least 6 characters.")
+    if len(req.password) < 8 or len(req.password) > 16:
+        raise HTTPException(status_code=400, detail="Password must be between 8 and 16 characters.")
 
     try:
         otp = create_user(req.username, req.email, req.password)
     except ValueError as e:
-        raise HTTPException(status_code=409, detail=str(e))
+        detail = str(e)
+        # Distinguish duplicate-email (409) from validation errors (400)
+        if "already exists" in detail.lower():
+            raise HTTPException(status_code=409, detail=detail)
+        raise HTTPException(status_code=400, detail=detail)
+    except (ConnectionFailure, ServerSelectionTimeoutError) as e:
+        logger.error(f"MongoDB error during signup: {e}")
+        raise HTTPException(status_code=503, detail="Database temporarily unavailable. Please try again later.")
+    except Exception as e:
+        logger.error(f"Unexpected error during signup: {e}")
+        raise HTTPException(status_code=503, detail="Database temporarily unavailable. Please try again later.")
 
     # Send OTP email (non-blocking failure — user can resend)
     email_sent = send_otp_email(req.email, otp)
@@ -113,6 +124,9 @@ def login(req: LoginRequest):
         if "verify" in detail.lower():
             raise HTTPException(status_code=403, detail=detail)
         raise HTTPException(status_code=401, detail=detail)
+    except (ConnectionFailure, ServerSelectionTimeoutError) as e:
+        logger.error(f"MongoDB error during login: {e}")
+        raise HTTPException(status_code=503, detail="Database temporarily unavailable. Please try again later.")
 
     access_token = create_access_token(
         data={"sub": user["username"], "email": user["email"]}

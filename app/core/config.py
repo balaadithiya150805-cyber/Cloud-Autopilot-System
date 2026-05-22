@@ -18,6 +18,7 @@ class Settings(BaseSettings):
     SMTP_PORT: int = 587
     SMTP_USER: str = ""
     SMTP_PASSWORD: str = ""
+    SMTP_FROM: str = ""
 
     JWT_SECRET: str = "super-secret-key-for-dev"
     JWT_ALGORITHM: str = "HS256"
@@ -46,6 +47,23 @@ class Settings(BaseSettings):
 @lru_cache()
 def get_settings():
     s = Settings()
+    
+    # ── Legacy Env Fallbacks ──
+    if not s.SMTP_USER and os.environ.get("EMAIL_USER"):
+        s.SMTP_USER = os.environ.get("EMAIL_USER", "")
+    if not s.SMTP_PASSWORD and os.environ.get("EMAIL_PASS"):
+        s.SMTP_PASSWORD = os.environ.get("EMAIL_PASS", "")
+    if s.SMTP_HOST == "smtp.gmail.com" and os.environ.get("EMAIL_HOST"):
+        s.SMTP_HOST = os.environ.get("EMAIL_HOST", "smtp.gmail.com")
+    if s.SMTP_PORT == 587 and os.environ.get("EMAIL_PORT"):
+        try:
+            s.SMTP_PORT = int(os.environ.get("EMAIL_PORT", 587))
+        except ValueError:
+            pass
+            
+    if not s.SMTP_FROM:
+        s.SMTP_FROM = s.SMTP_USER
+
     # ── Validate SMTP config at startup ──
     if not s.SMTP_HOST:
         _config_logger.error("SMTP_HOST is missing in .env — email sending will fail!")

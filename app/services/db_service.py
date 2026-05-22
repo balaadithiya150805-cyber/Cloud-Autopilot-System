@@ -18,20 +18,24 @@ _SERVER_SELECT_MS = 5000        # 5 seconds to pick a server from replica set
 _SOCKET_TIMEOUT_MS = 10000      # 10 seconds for individual operations
 
 try:
-    client = MongoClient(
-        settings.MONGO_URI,
-        serverSelectionTimeoutMS=_SERVER_SELECT_MS,
-        connectTimeoutMS=_CONNECT_TIMEOUT_MS,
-        socketTimeoutMS=_SOCKET_TIMEOUT_MS,
-        # Retry writes once (Atlas requirement)
-        retryWrites=True,
-    )
+    if not settings.is_dev and ("localhost" in settings.MONGO_URI or "127.0.0.1" in settings.MONGO_URI):
+        logger.error("MongoDB URI is localhost in production! Forcing degraded mode.")
+        client = MongoClient("mongodb://0.0.0.0:27018/", serverSelectionTimeoutMS=100)
+    else:
+        client = MongoClient(
+            settings.MONGO_URI,
+            serverSelectionTimeoutMS=_SERVER_SELECT_MS,
+            connectTimeoutMS=_CONNECT_TIMEOUT_MS,
+            socketTimeoutMS=_SOCKET_TIMEOUT_MS,
+            # Retry writes once (Atlas requirement)
+            retryWrites=True,
+        )
     db = client[settings.MONGO_DB_NAME]
 except Exception as e:
     # If even creating the client fails (e.g. malformed URI),
     # create a dummy client that will fail gracefully later.
     logger.error(f"Failed to create MongoDB client: {e}")
-    client = MongoClient("mongodb://localhost:27017/", serverSelectionTimeoutMS=1000)
+    client = MongoClient("mongodb://0.0.0.0:27018/", serverSelectionTimeoutMS=100)
     db = client[settings.MONGO_DB_NAME]
 
 cloud_costs_col = db["cloud_costs"]

@@ -41,6 +41,17 @@ def _generate_otp(length: int = 6) -> str:
     return "".join(random.choices(string.digits, k=length))
 
 
+def validate_password(password: str) -> None:
+    """
+    Validate password length is within 8–16 characters.
+    Raises ValueError with a clear message if invalid.
+    Must be called BEFORE bcrypt hashing to prevent the
+    72-byte bcrypt limit from silently truncating input.
+    """
+    if len(password) < 8 or len(password) > 16:
+        raise ValueError("Password must be between 8 and 16 characters.")
+
+
 # ── Public API ──────────────────────────────────────────
 
 def get_user_by_email(email: str) -> Optional[Dict]:
@@ -65,6 +76,9 @@ def create_user(username: str, email: str, password: str) -> str:
     Raises ValueError if the email is already registered.
     """
     email = email.lower().strip()
+
+    # Validate password before any DB or bcrypt operations
+    validate_password(password)
 
     if get_user_by_email(email):
         raise ValueError("An account with this email already exists.")
@@ -184,7 +198,13 @@ def authenticate_user(email: str, password: str) -> Dict:
             return {"username": "Admin", "email": "admin@example.com"}
         raise ValueError("Invalid email or password.")
 
-    if not bcrypt.verify(password, user["password_hash"]):
+    try:
+        if not bcrypt.verify(password, user["password_hash"]):
+            raise ValueError("Invalid email or password.")
+    except ValueError:
+        raise  # Re-raise our own ValueError
+    except Exception as e:
+        logger.error(f"bcrypt error during login for {email}: {e}")
         raise ValueError("Invalid email or password.")
 
     if not user.get("is_verified"):
@@ -277,8 +297,7 @@ def change_user_password(email: str, current_password: str, new_password: str) -
     if not bcrypt.verify(current_password, user["password_hash"]):
         raise ValueError("Current password is incorrect.")
 
-    if len(new_password) < 6:
-        raise ValueError("New password must be at least 6 characters.")
+    validate_password(new_password)
 
     users_col.update_one(
         {"email": email},

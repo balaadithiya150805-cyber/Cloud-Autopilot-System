@@ -73,7 +73,7 @@ def send_otp_email(to_email: str, otp: str) -> bool:
 
     msg = MIMEMultipart("alternative")
     msg["Subject"] = subject
-    msg["From"] = settings.SMTP_USER
+    msg["From"] = settings.SMTP_FROM
     msg["To"] = to_email
     msg.attach(MIMEText(text_body, "plain"))
     msg.attach(MIMEText(html_body, "html"))
@@ -124,7 +124,7 @@ def send_email(to_email: str, subject: str, body: str) -> bool:
 
     msg = MIMEText(body, "plain")
     msg["Subject"] = subject
-    msg["From"] = settings.SMTP_USER
+    msg["From"] = settings.SMTP_FROM
     msg["To"] = to_email
 
     try:

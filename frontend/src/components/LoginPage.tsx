@@ -92,7 +92,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onBack }) => {
     setSuccessMsg('');
 
     if (!isValidEmail(email)) { setError('Please enter a valid email address.'); return; }
-    if (password.length < 6) { setError('Password must be at least 6 characters.'); return; }
+    if (password.length < 8) { setError('Password must be at least 8 characters.'); return; }
 
     setIsLoading(true);
     try {
@@ -112,7 +112,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onBack }) => {
 
     if (!username.trim()) { setError('Username is required.'); return; }
     if (!isValidEmail(email)) { setError('Please enter a valid email address.'); return; }
-    if (password.length < 6) { setError('Password must be at least 6 characters.'); return; }
+    if (password.length < 8 || password.length > 16) { setError('Password must be between 8 and 16 characters.'); return; }
 
     setIsLoading(true);
     try {
@@ -323,6 +323,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onBack }) => {
                     placeholder="••••••••"
                     className="w-full pl-11 pr-12 py-3 rounded-xl bg-slate-50 dark:bg-gray-800/60 border border-slate-200 dark:border-gray-700 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition-all text-sm"
                     autoComplete="current-password"
+                    maxLength={16}
                     required
                   />
                   <button
@@ -456,9 +457,11 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onBack }) => {
                     type={showPassword ? 'text' : 'password'}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Min. 6 characters"
+                    placeholder="8–16 characters"
                     className="w-full pl-11 pr-12 py-3 rounded-xl bg-slate-50 dark:bg-gray-800/60 border border-slate-200 dark:border-gray-700 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition-all text-sm"
                     autoComplete="new-password"
+                    minLength={8}
+                    maxLength={16}
                     required
                   />
                   <button
@@ -474,6 +477,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onBack }) => {
                     )}
                   </button>
                 </div>
+                <p className="text-xs text-slate-500 dark:text-gray-400 mt-1">Password must be 8–16 characters</p>
                 {/* Password strength indicator */}
                 {password && (
                   <div className="flex gap-1 pt-1">

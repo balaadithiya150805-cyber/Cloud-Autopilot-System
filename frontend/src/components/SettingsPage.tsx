@@ -175,8 +175,8 @@ export const SettingsPage: React.FC<Props> = ({ theme, onThemeChange }) => {
       setPwdMsg({ type: 'error', text: 'New passwords do not match.' });
       return;
     }
-    if (newPwd.length < 6) {
-      setPwdMsg({ type: 'error', text: 'Password must be at least 6 characters.' });
+    if (newPwd.length < 8 || newPwd.length > 16) {
+      setPwdMsg({ type: 'error', text: 'Password must be between 8 and 16 characters.' });
       return;
     }
     setPwdLoading(true);
@@ -383,12 +383,12 @@ export const SettingsPage: React.FC<Props> = ({ theme, onThemeChange }) => {
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1">New Password</label>
-              <input type="password" value={newPwd} onChange={e => setNewPwd(e.target.value)} placeholder="Min. 6 characters"
+              <input type="password" value={newPwd} onChange={e => setNewPwd(e.target.value)} placeholder="8–16 characters" minLength={8} maxLength={16}
                 className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-slate-800 dark:text-gray-100 focus:ring-2 focus:ring-violet-500 outline-none" />
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1">Confirm New Password</label>
-              <input type="password" value={confirmPwd} onChange={e => setConfirmPwd(e.target.value)} placeholder="Re-enter new password"
+              <input type="password" value={confirmPwd} onChange={e => setConfirmPwd(e.target.value)} placeholder="8–16 characters" minLength={8} maxLength={16}
                 className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-slate-800 dark:text-gray-100 focus:ring-2 focus:ring-violet-500 outline-none" />
             </div>
             <FeedbackBanner msg={pwdMsg} />
