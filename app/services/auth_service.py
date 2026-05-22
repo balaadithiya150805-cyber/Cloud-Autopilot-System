@@ -48,7 +48,25 @@ def validate_password(password: str) -> None:
     Must be called BEFORE bcrypt hashing to prevent the
     72-byte bcrypt limit from silently truncating input.
     """
-    if len(password) < 8 or len(password) > 16:
+    if not isinstance(password, str) or len(password) < 8 or len(password) > 16:
+        raise ValueError("Password must be between 8 and 16 characters.")
+
+
+def hash_password(password: str) -> str:
+    validate_password(password)
+    try:
+        return bcrypt.hash(password)
+    except Exception as e:
+        logger.error(f"bcrypt hash error: {e}")
+        raise ValueError("Password must be between 8 and 16 characters.")
+
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    validate_password(plain_password)
+    try:
+        return bcrypt.verify(plain_password, hashed_password)
+    except Exception as e:
+        logger.error(f"bcrypt verify error: {e}")
         raise ValueError("Password must be between 8 and 16 characters.")
 
 
@@ -89,7 +107,7 @@ def create_user(username: str, email: str, password: str) -> str:
     doc = {
         "username": username.strip(),
         "email": email,
-        "password_hash": bcrypt.hash(password),
+        "password_hash": hash_password(password),
         "is_verified": False,
         "otp": otp,
         "otp_expiry": otp_expiry,
@@ -198,13 +216,7 @@ def authenticate_user(email: str, password: str) -> Dict:
             return {"username": "Admin", "email": "admin@example.com"}
         raise ValueError("Invalid email or password.")
 
-    try:
-        if not bcrypt.verify(password, user["password_hash"]):
-            raise ValueError("Invalid email or password.")
-    except ValueError:
-        raise  # Re-raise our own ValueError
-    except Exception as e:
-        logger.error(f"bcrypt error during login for {email}: {e}")
+    if not verify_password(password, user["password_hash"]):
         raise ValueError("Invalid email or password.")
 
     if not user.get("is_verified"):
@@ -268,7 +280,7 @@ def update_user_email(current_email: str, new_email: str, password: str) -> Dict
     if not user:
         raise ValueError("User not found.")
 
-    if not bcrypt.verify(password, user["password_hash"]):
+    if not verify_password(password, user["password_hash"]):
         raise ValueError("Incorrect password.")
 
     # Check if new email is already taken
@@ -294,14 +306,14 @@ def change_user_password(email: str, current_password: str, new_password: str) -
     if not user:
         raise ValueError("User not found.")
 
-    if not bcrypt.verify(current_password, user["password_hash"]):
+    if not verify_password(current_password, user["password_hash"]):
         raise ValueError("Current password is incorrect.")
 
     validate_password(new_password)
 
     users_col.update_one(
         {"email": email},
-        {"$set": {"password_hash": bcrypt.hash(new_password)}}
+        {"$set": {"password_hash": hash_password(new_password)}}
     )
     logger.info(f"Password changed for: {email}")
     return True

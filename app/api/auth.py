@@ -76,6 +76,8 @@ def signup(req: SignupRequest):
         otp = create_user(req.username, req.email, req.password)
     except ValueError as e:
         detail = str(e)
+        if detail == "Password must be between 8 and 16 characters.":
+            raise HTTPException(status_code=400, detail=detail)
         # Distinguish duplicate-email (409) from validation errors (400)
         if "already exists" in detail.lower():
             raise HTTPException(status_code=409, detail=detail)
@@ -120,6 +122,8 @@ def login(req: LoginRequest):
         user = authenticate_user(req.email, req.password)
     except ValueError as e:
         detail = str(e)
+        if detail == "Password must be between 8 and 16 characters.":
+            raise HTTPException(status_code=400, detail=detail)
         # Use 403 for "not verified" so the frontend can distinguish
         if "verify" in detail.lower():
             raise HTTPException(status_code=403, detail=detail)
@@ -219,7 +223,10 @@ def update_email(req: UpdateEmailRequest, current_user: dict = Depends(get_curre
             "email": result["email"],
         }
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        detail = str(e)
+        if detail == "Password must be between 8 and 16 characters.":
+            raise HTTPException(status_code=400, detail=detail)
+        raise HTTPException(status_code=400, detail=detail)
 
 
 @router.put("/change-password")
@@ -229,4 +236,7 @@ def change_password(req: ChangePasswordRequest, current_user: dict = Depends(get
         change_user_password(current_user["email"], req.current_password, req.new_password)
         return {"message": "Password changed successfully."}
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        detail = str(e)
+        if detail == "Password must be between 8 and 16 characters.":
+            raise HTTPException(status_code=400, detail=detail)
+        raise HTTPException(status_code=400, detail=detail)
