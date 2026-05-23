@@ -19,6 +19,11 @@ class Settings(BaseSettings):
     SMTP_USER: str = ""
     SMTP_PASSWORD: str = ""
     SMTP_FROM: str = ""
+    
+    EMAIL_PROVIDER: str = "smtp"
+    RESEND_API_KEY: Optional[str] = None
+    FROM_EMAIL: str = "onboarding@resend.dev"
+    ENABLE_OTP_LOG_FALLBACK: bool = True
 
     JWT_SECRET: str = "super-secret-key-for-dev"
     JWT_ALGORITHM: str = "HS256"

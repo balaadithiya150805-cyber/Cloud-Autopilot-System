@@ -4,6 +4,7 @@ Includes dev-mode console fallback and detailed error logging.
 """
 
 import smtplib
+import requests
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
@@ -25,25 +26,82 @@ def _log_otp_to_console(to_email: str, otp: str) -> None:
     )
 
 
+def _send_via_resend(to_email: str, otp: str) -> bool:
+    if not settings.RESEND_API_KEY:
+        logger.error("RESEND_API_KEY is missing. Cannot send via Resend.")
+        return False
+
+    url = "https://api.resend.com/emails"
+    headers = {
+        "Authorization": f"Bearer {settings.RESEND_API_KEY}",
+        "Content-Type": "application/json"
+    }
+    
+    html_body = f"""\
+    <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 480px; margin: 0 auto; padding: 32px; background: #f8fafc; border-radius: 16px;">
+        <h2 style="text-align: center; color: #1e293b; margin-bottom: 8px;">Cloud Autopilot System</h2>
+        <p style="text-align: center; color: #64748b; font-size: 14px; margin-bottom: 28px;">
+            Your verification code is:
+        </p>
+        <div style="text-align: center; background: white; border: 2px dashed #cbd5e1; border-radius: 12px; padding: 20px; margin-bottom: 24px;">
+            <span style="font-size: 36px; font-weight: 700; letter-spacing: 8px; color: #1e293b;">{otp}</span>
+        </div>
+        <p style="text-align: center; color: #94a3b8; font-size: 12px;">
+            This code expires in 10 minutes.
+        </p>
+    </div>
+    """
+
+    payload = {
+        "from": settings.FROM_EMAIL,
+        "to": [to_email],
+        "subject": "Your Cloud Autopilot verification code",
+        "html": html_body
+    }
+
+    try:
+        response = requests.post(url, headers=headers, json=payload, timeout=10)
+        response.raise_for_status()
+        logger.info(f"[SUCCESS] OTP email sent via Resend to {to_email}")
+        return True
+    except requests.exceptions.RequestException as e:
+        logger.error(f"[ERROR] Resend API failed for {to_email}: {e}")
+        if response is not None and hasattr(response, 'text'):
+            logger.error(f"[ERROR] Resend API response: {response.text}")
+        return False
+
+
 def send_otp_email(to_email: str, otp: str) -> bool:
     """
     Send a 6-digit OTP to the given email address.
 
+    - Uses Resend if EMAIL_PROVIDER=resend, else SMTP.
     - On success → returns True, logs confirmation.
-    - On failure → returns False, logs full error.
-    - In dev mode or when SMTP is not configured → always prints OTP to console.
+    - On failure → logs full error and optionally logs OTP fallback.
+    - In dev mode → always prints OTP to console.
     """
-    # ── Dev fallback: always log OTP to console in development ──
     if settings.is_dev:
         _log_otp_to_console(to_email, otp)
 
-    # ── Skip actual send if SMTP is not configured ──
-    if not settings.smtp_configured:
-        logger.warning(
-            f"SMTP not configured — skipping email to {to_email}. "
-            "Set SMTP_USER and SMTP_PASSWORD in .env to enable."
-        )
-        return False
+    success = False
+
+    if getattr(settings, "EMAIL_PROVIDER", "").lower() == "resend":
+        success = _send_via_resend(to_email, otp)
+    else:
+        if not settings.smtp_configured:
+            logger.warning(
+                f"SMTP not configured — skipping email to {to_email}. "
+                "Set SMTP_USER and SMTP_PASSWORD in .env to enable."
+            )
+        else:
+            success = _send_via_smtp(to_email, otp)
+
+    if not success and getattr(settings, "ENABLE_OTP_LOG_FALLBACK", False):
+        logger.info(f"[OTP FALLBACK] email={to_email} otp={otp}")
+
+    return success
+
+def _send_via_smtp(to_email: str, otp: str) -> bool:
 
     subject = "Cloud Autopilot – Verify Your Email"
 

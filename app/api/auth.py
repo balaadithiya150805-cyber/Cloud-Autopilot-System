@@ -91,12 +91,9 @@ def signup(req: SignupRequest):
     email_sent = send_otp_email(req.email, otp)
 
     if email_sent:
-        if is_new:
-            msg = "Account created. Please check your email for the verification code."
-        else:
-            msg = "Account exists but is not verified. A new OTP has been sent."
+        msg = "OTP sent successfully."
     else:
-        msg = "Account created. OTP email could not be sent — check server logs or click Resend."
+        msg = "OTP generated. Email delivery failed, check server logs."
         logger.warning(f"OTP email failed for {req.email} — user can resend")
 
     return {
@@ -188,9 +185,9 @@ def resend_otp(req: ResendOtpRequest):
     email_sent = send_otp_email(req.email, otp)
 
     if email_sent:
-        msg = "A new verification code has been sent to your email."
+        msg = "OTP sent successfully."
     else:
-        msg = "New OTP generated but email could not be sent — check server logs."
+        msg = "OTP generated. Email delivery failed, check server logs."
 
     return {
         "message": msg,
