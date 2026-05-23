@@ -116,9 +116,13 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onBack }) => {
 
     setIsLoading(true);
     try {
-      await signup(username, email, password);
+      const resp = await signup(username, email, password);
       setError('');
-      toast('success', 'Account created! Check your email for the verification code.');
+      if (resp.is_new === false) {
+        toast('info', 'Account exists but is not verified. A new OTP has been sent.');
+      } else {
+        toast('success', 'Account created! Check your email for the verification code.');
+      }
       setView('verify');
     } catch (err) {
       setError(getErrorMsg(err));

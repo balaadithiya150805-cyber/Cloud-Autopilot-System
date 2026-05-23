@@ -73,14 +73,12 @@ def signup(req: SignupRequest):
         raise HTTPException(status_code=400, detail="Password must be between 8 and 16 characters.")
 
     try:
-        otp = create_user(req.username, req.email, req.password)
+        otp, is_new = create_user(req.username, req.email, req.password)
     except ValueError as e:
         detail = str(e)
         if detail == "Password must be between 8 and 16 characters.":
             raise HTTPException(status_code=400, detail=detail)
-        # Distinguish duplicate-email (409) from validation errors (400)
-        if "already exists" in detail.lower():
-            raise HTTPException(status_code=409, detail=detail)
+        # Distinguish verified-email from validation errors (400)
         raise HTTPException(status_code=400, detail=detail)
     except (ConnectionFailure, ServerSelectionTimeoutError) as e:
         logger.error(f"MongoDB error during signup: {e}")
@@ -93,7 +91,10 @@ def signup(req: SignupRequest):
     email_sent = send_otp_email(req.email, otp)
 
     if email_sent:
-        msg = "Account created. Please check your email for the verification code."
+        if is_new:
+            msg = "Account created. Please check your email for the verification code."
+        else:
+            msg = "Account exists but is not verified. A new OTP has been sent."
     else:
         msg = "Account created. OTP email could not be sent — check server logs or click Resend."
         logger.warning(f"OTP email failed for {req.email} — user can resend")
@@ -101,6 +102,7 @@ def signup(req: SignupRequest):
     return {
         "message": msg,
         "email_sent": email_sent,
+        "is_new": is_new,
     }
 
 
@@ -178,7 +180,10 @@ def resend_otp(req: ResendOtpRequest):
     try:
         otp = regenerate_otp(req.email)
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        detail = str(e)
+        if "not found" in detail.lower():
+            raise HTTPException(status_code=404, detail=detail)
+        raise HTTPException(status_code=400, detail=detail)
 
     email_sent = send_otp_email(req.email, otp)
 

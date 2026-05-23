@@ -94,7 +94,7 @@ def get_user_by_email(email: str) -> Optional[Dict]:
         return None
 
 
-def create_user(username: str, email: str, password: str) -> str:
+def create_user(username: str, email: str, password: str) -> tuple[str, bool]:
     """
     Register a new user.
 
@@ -102,16 +102,30 @@ def create_user(username: str, email: str, password: str) -> str:
     - Generate a 6-digit OTP valid for 10 minutes.
     - Insert into the users collection.
 
-    Returns the plaintext OTP so the caller can email it.
-    Raises ValueError if the email is already registered.
+    Returns (otp, is_new) where is_new is False if user existed but wasn't verified.
+    Raises ValueError if the email is already registered and verified.
     """
     email = email.lower().strip()
 
     # Validate password before any DB or bcrypt operations
     validate_password(password)
 
-    if get_user_by_email(email):
-        raise ValueError("An account with this email already exists.")
+    existing_user = get_user_by_email(email)
+    if existing_user:
+        if existing_user.get("is_verified"):
+            logger.info(f"Signup attempt for verified email: {email}")
+            raise ValueError("Email already registered. Please login.")
+        else:
+            logger.info(f"Unverified user {email} signing up again. Regenerating OTP.")
+            otp = _generate_otp()
+            otp_expiry = datetime.now(timezone.utc) + timedelta(minutes=10)
+            users_col.update_one(
+                {"email": email},
+                {"$set": {"otp": otp, "otp_expiry": otp_expiry, "password_hash": hash_password(password)}}
+            )
+            if settings.is_dev:
+                logger.info(f"[DEV] OTP for {email}: {otp}")
+            return otp, False
 
     otp = _generate_otp()
     otp_expiry = datetime.now(timezone.utc) + timedelta(minutes=10)
@@ -132,7 +146,7 @@ def create_user(username: str, email: str, password: str) -> str:
     if settings.is_dev:
         logger.info(f"[DEV] OTP for {email}: {otp}")
 
-    return otp
+    return otp, True
 
 
 def regenerate_otp(email: str) -> str:
@@ -146,9 +160,11 @@ def regenerate_otp(email: str) -> str:
     user = get_user_by_email(email)
 
     if not user:
-        raise ValueError("No account found with this email.")
+        logger.warning(f"Resend OTP failed: user not found ({email})")
+        raise ValueError("User not found")
     if user.get("is_verified"):
-        raise ValueError("This account is already verified.")
+        logger.info(f"Resend OTP failed: already verified ({email})")
+        raise ValueError("Email already verified. Please login.")
 
     # ── Cooldown check ──
     last_otp_time = user.get("otp_expiry")
@@ -194,10 +210,20 @@ def verify_otp(email: str, otp: str) -> bool:
     stored_otp = user.get("otp")
     otp_expiry = user.get("otp_expiry")
 
-    if not stored_otp or stored_otp != otp:
+    if not stored_otp or str(stored_otp).strip() != str(otp).strip():
+        logger.warning(f"Invalid OTP attempt for {email}")
         raise ValueError("Invalid OTP. Please check and try again.")
 
-    if otp_expiry and datetime.now(timezone.utc) > otp_expiry:
+    if not otp_expiry:
+        logger.warning(f"OTP expiry missing for {email}")
+        raise ValueError("OTP has expired. Please request a new one.")
+        
+    # Ensure timezone awareness before comparing
+    if otp_expiry.tzinfo is None:
+        otp_expiry = otp_expiry.replace(tzinfo=timezone.utc)
+        
+    if datetime.now(timezone.utc) > otp_expiry:
+        logger.warning(f"Expired OTP attempt for {email}")
         raise ValueError("OTP has expired. Please request a new one.")
 
     # Mark verified and clear OTP fields

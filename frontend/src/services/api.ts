@@ -174,6 +174,7 @@ export interface UserProfile {
 export interface AuthResponse {
   message: string;
   email_sent?: boolean;
+  is_new?: boolean;
 }
 
 // ── Auth API ───────────────────────────────────────────
