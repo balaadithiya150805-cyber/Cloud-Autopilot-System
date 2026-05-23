@@ -350,7 +350,7 @@ export const SettingsPage: React.FC<Props> = ({ theme, onThemeChange }) => {
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1">Current Password</label>
-              <input type="password" value={emailPassword} onChange={e => setEmailPassword(e.target.value)} placeholder="Confirm your password"
+              <input type="password" value={emailPassword} onChange={e => setEmailPassword(e.target.value)} placeholder="Confirm your password" maxLength={16}
                 className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-slate-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 outline-none" />
             </div>
             <FeedbackBanner msg={emailMsg} />
@@ -378,7 +378,7 @@ export const SettingsPage: React.FC<Props> = ({ theme, onThemeChange }) => {
           <form onSubmit={handleChangePassword} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1">Current Password</label>
-              <input type="password" value={currentPwd} onChange={e => setCurrentPwd(e.target.value)} placeholder="Enter current password"
+              <input type="password" value={currentPwd} onChange={e => setCurrentPwd(e.target.value)} placeholder="Enter current password" maxLength={16}
                 className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-slate-800 dark:text-gray-100 focus:ring-2 focus:ring-violet-500 outline-none" />
             </div>
             <div>

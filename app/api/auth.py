@@ -4,7 +4,7 @@ Auth API – signup, verify-otp, login, resend-otp endpoints.
 
 from fastapi import APIRouter, HTTPException, Depends
 from pymongo.errors import ConnectionFailure, ServerSelectionTimeoutError
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 
 from app.services.auth_service import (
     create_user,
@@ -30,7 +30,7 @@ router = APIRouter()
 class SignupRequest(BaseModel):
     username: str
     email: EmailStr
-    password: str
+    password: str = Field(..., min_length=8, max_length=16)
 
 
 class VerifyOtpRequest(BaseModel):
@@ -40,7 +40,7 @@ class VerifyOtpRequest(BaseModel):
 
 class LoginRequest(BaseModel):
     email: EmailStr
-    password: str
+    password: str = Field(..., max_length=16)
 
 
 class ResendOtpRequest(BaseModel):
@@ -53,12 +53,12 @@ class LogoutRequest(BaseModel):
     refresh_token: str
 
 class UpdateEmailRequest(BaseModel):
-    current_password: str
+    current_password: str = Field(..., max_length=16)
     new_email: EmailStr
 
 class ChangePasswordRequest(BaseModel):
-    current_password: str
-    new_password: str
+    current_password: str = Field(..., max_length=16)
+    new_password: str = Field(..., min_length=8, max_length=16)
 
 
 # ── Endpoints ───────────────────────────────────────────

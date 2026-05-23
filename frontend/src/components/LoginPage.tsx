@@ -92,7 +92,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onBack }) => {
     setSuccessMsg('');
 
     if (!isValidEmail(email)) { setError('Please enter a valid email address.'); return; }
-    if (password.length < 8) { setError('Password must be at least 8 characters.'); return; }
+    if (password.length < 8 || password.length > 16) { setError('Password must be between 8 and 16 characters.'); return; }
 
     setIsLoading(true);
     try {

@@ -8,6 +8,7 @@ import string
 from datetime import datetime, timedelta, timezone
 from typing import Optional, Dict
 
+from fastapi import HTTPException
 from passlib.hash import bcrypt
 
 from app.services.db_service import db
@@ -44,30 +45,41 @@ def _generate_otp(length: int = 6) -> str:
 def validate_password(password: str) -> None:
     """
     Validate password length is within 8–16 characters.
-    Raises ValueError with a clear message if invalid.
+    Raises HTTPException(400) with a clear message if invalid.
     Must be called BEFORE bcrypt hashing to prevent the
     72-byte bcrypt limit from silently truncating input.
     """
-    if not isinstance(password, str) or len(password) < 8 or len(password) > 16:
-        raise ValueError("Password must be between 8 and 16 characters.")
+    if not password or not isinstance(password, str):
+        raise HTTPException(status_code=400, detail="Password must be between 8 and 16 characters.")
+    if len(password) < 8 or len(password) > 16:
+        raise HTTPException(status_code=400, detail="Password must be between 8 and 16 characters.")
 
 
 def hash_password(password: str) -> str:
     validate_password(password)
     try:
         return bcrypt.hash(password)
+    except ValueError as e:
+        logger.error(f"bcrypt ValueError (possibly truncate error): {e}")
+        raise HTTPException(status_code=400, detail="Password must be between 8 and 16 characters.")
     except Exception as e:
         logger.error(f"bcrypt hash error: {e}")
-        raise ValueError("Password must be between 8 and 16 characters.")
+        raise HTTPException(status_code=400, detail="Password must be between 8 and 16 characters.")
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    validate_password(plain_password)
+    if not plain_password or not isinstance(plain_password, str):
+        raise HTTPException(status_code=400, detail="Password must be between 8 and 16 characters.")
+    if len(plain_password) > 16:
+        raise HTTPException(status_code=400, detail="Password must be between 8 and 16 characters.")
     try:
         return bcrypt.verify(plain_password, hashed_password)
+    except ValueError as e:
+        logger.error(f"bcrypt ValueError (possibly truncate error): {e}")
+        raise HTTPException(status_code=400, detail="Password must be between 8 and 16 characters.")
     except Exception as e:
         logger.error(f"bcrypt verify error: {e}")
-        raise ValueError("Password must be between 8 and 16 characters.")
+        raise HTTPException(status_code=400, detail="Password must be between 8 and 16 characters.")
 
 
 # ── Public API ──────────────────────────────────────────
@@ -216,6 +228,9 @@ def authenticate_user(email: str, password: str) -> Dict:
             return {"username": "Admin", "email": "admin@example.com"}
         raise ValueError("Invalid email or password.")
 
+    if not password or not isinstance(password, str) or len(password) > 16:
+        raise HTTPException(status_code=400, detail="Password must be between 8 and 16 characters.")
+
     if not verify_password(password, user["password_hash"]):
         raise ValueError("Invalid email or password.")
 
@@ -300,6 +315,7 @@ def change_user_password(email: str, current_password: str, new_password: str) -
     Change user's password after verifying the current one.
     Raises ValueError on failure.
     """
+    validate_password(new_password)
     email = email.lower().strip()
     user = get_user_by_email(email)
 
