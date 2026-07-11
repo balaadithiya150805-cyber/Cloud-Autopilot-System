@@ -72,26 +72,6 @@ npm install
 npm run dev
 ```
 
-### 3. Usage
-Once both servers are running, access the dashboard at:
-**[http://localhost:5173](http://localhost:5173)**
-
-*Note: Use the "Initialize Data" button in the upper right upon first launch to seed the backend and populate the dashboard.*
-
----
-
-##  Screenshots
-
-*(Add your screenshots here by saving them to a `./docs` folder and referencing them below)*
-
-![Dashboard Light Mode](./docs/screenshot-light.png)
-> *The interactive dashboard displaying dynamic cost anomalies and insights.*
-
-![Dashboard Dark Mode](./docs/screenshot-dark.png)
-> *The dark-mode configuration, easily switched via the header toggle.*
-
----
-
 ##  Future Improvements
 
 - [ ] **AWS Cost Explorer API Integration**: Replace the algorithmic generation mock routes with direct AWS authenticated Boto3 endpoints.
