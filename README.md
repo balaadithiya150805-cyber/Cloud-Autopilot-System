@@ -1,10 +1,10 @@
-# 🛡️ Cloud Cost Guardian AI
+ ## Cloud Cost Guardian AI
 
 Cloud Cost Guardian AI is an intelligent, autonomous dashboard designed to give you total visibility and control over your AWS financial surveillance. By leveraging predictive models and continuous learning, the Guardian acts as a financial watchdog—tracking baseline costs, exposing hidden spikes, forecasting future overheads, and offering actionable insights all within a sleek, low-latency interface.
 
 ---
 
-## ✨ Features
+##  Features
 
 *   **Cost Tracking**: Monitor your real-time and historical cloud spend through visually responsive Area Charts with smooth gradient scaling.
 *   **Anomaly Detection**: Automatically filter operations scanning for hidden deviations within your architectural cost mapping. Critical spikes are flagged recursively.
@@ -12,7 +12,7 @@ Cloud Cost Guardian AI is an intelligent, autonomous dashboard designed to give 
 *   **Explanation AI**: Not only will the AI spot the problem—it will parse out the *Root Cause* and offer a *Recommended Action* for infrastructure remediation.
 *   **SaaS Dashboard**: A premium, fully responsive React interface featuring an integrated Dark Mode and smooth local state persistence.
 
-## 🛠️ Technology Stack
+##  Technology Stack
 
 **Frontend**
 *   **React** & **Vite**
@@ -27,7 +27,7 @@ Cloud Cost Guardian AI is an intelligent, autonomous dashboard designed to give 
 
 ---
 
-## 🏗️ Architecture Overview
+## Architecture Overview
 
 The application features a loosely coupled architecture:
 1.  **React Frontend:** Connects safely to the Backend via standard `fetch` API wrappers with built-in retry polling. React relies completely on data orchestration pushed up from the Python server.
@@ -36,7 +36,7 @@ The application features a loosely coupled architecture:
 
 ---
 
-## 🚀 Setup Steps
+## Setup Steps
 
 ### Prerequisites
 *   Node.js (`v18+`)
@@ -80,7 +80,7 @@ Once both servers are running, access the dashboard at:
 
 ---
 
-## 📸 Screenshots
+##  Screenshots
 
 *(Add your screenshots here by saving them to a `./docs` folder and referencing them below)*
 
@@ -92,7 +92,7 @@ Once both servers are running, access the dashboard at:
 
 ---
 
-## 🛣️ Future Improvements
+##  Future Improvements
 
 - [ ] **AWS Cost Explorer API Integration**: Replace the algorithmic generation mock routes with direct AWS authenticated Boto3 endpoints.
 - [ ] **Push Alerts**: Direct integration with Slack/Discord webhooks to autonomously ping engineering teams on detection thresholds.
