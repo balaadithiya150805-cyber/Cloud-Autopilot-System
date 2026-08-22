@@ -1,80 +1,271 @@
- ## Cloud Cost Guardian AI
+# Cloud Autopilot System
 
-Cloud Cost Guardian AI is an intelligent, autonomous dashboard designed to give you total visibility and control over your AWS financial surveillance. By leveraging predictive models and continuous learning, the Guardian acts as a financial watchdog—tracking baseline costs, exposing hidden spikes, forecasting future overheads, and offering actionable insights all within a sleek, low-latency interface.
+## AI-Powered Cloud Cost Monitoring, Anomaly Detection, Forecasting and Recommendation Platform
 
----
+Cloud Autopilot System is a full-stack cloud cost intelligence platform designed to help users monitor cloud expenditure, identify abnormal spending patterns, forecast future costs, and understand potential causes of unexpected cost changes.
 
-##  Features
+The platform combines a modern React-based web interface with a FastAPI backend, MongoDB persistence, authentication services, analytical processing, anomaly detection, cost forecasting, and recommendation capabilities. It is deployed using a cloud-based architecture with Netlify for the frontend, Render for the backend, and MongoDB Atlas for persistent data storage.
 
-*   **Cost Tracking**: Monitor your real-time and historical cloud spend through visually responsive Area Charts with smooth gradient scaling.
-*   **Anomaly Detection**: Automatically filter operations scanning for hidden deviations within your architectural cost mapping. Critical spikes are flagged recursively.
-*   **Prediction AI**: Utilizes regression mechanisms to build robust forecasted models over 7-day windows, keeping budget management proactive.
-*   **Explanation AI**: Not only will the AI spot the problem—it will parse out the *Root Cause* and offer a *Recommended Action* for infrastructure remediation.
-*   **SaaS Dashboard**: A premium, fully responsive React interface featuring an integrated Dark Mode and smooth local state persistence.
+The primary objective of the project is to move cloud cost management beyond simple expense visualization by providing analytical insights that help users understand historical spending and make more informed decisions about future cloud expenditure.
 
-##  Technology Stack
+## Live Application
 
-**Frontend**
-*   **React** & **Vite**
-*   **Tailwind CSS** (Styling, Gradients & Dark Mode support)
-*   **Recharts** (SVG based Data Visualization)
-*   **Lucide React** (Clean, native iconography)
+Live Demo:
 
-**Backend**
-*   **FastAPI** (High-performance asynchronous Python API)
-*   **MongoDB** (Data storage and persistent model training records via PyMongo)
-*   **Uvicorn** (Lightning-fast ASGI server)
+https://tinyurl.com/pilotaws
+
+Source Code:
+
+https://github.com/balaadithiya150805-cyber/Cloud-Autopilot-System
 
 ---
 
-## Architecture Overview
+## Project Overview
 
-The application features a loosely coupled architecture:
-1.  **React Frontend:** Connects safely to the Backend via standard `fetch` API wrappers with built-in retry polling. React relies completely on data orchestration pushed up from the Python server.
-2.  **FastAPI Backend:** Orchestrates all complex logic, acting as the bridge to AWS data proxies (mocked or live connections). 
-3.  **MongoDB Storage:** The backend seamlessly syncs and retrieves document structures, acting securely as a high-read state machine. Contains built-in fallback triggers to populate default data if network connection fails.
+Cloud infrastructure can generate rapidly changing costs due to resource utilization, configuration changes, unexpected workloads, scaling activities, and inefficient resource allocation.
+
+Traditional cloud billing dashboards primarily focus on reporting existing expenditure. While these dashboards are useful for monitoring, they often require users to manually analyze historical patterns and identify unusual changes.
+
+Cloud Autopilot System addresses this problem by combining cost visualization, statistical analysis, anomaly detection, forecasting, and recommendation mechanisms into a single application.
+
+The platform provides a workflow in which cloud cost information is processed, analyzed, visualized, and converted into actionable insights.
+
+The system focuses on four primary analytical capabilities:
+
+1. Cost monitoring and visualization
+2. Anomaly detection
+3. Future cost prediction
+4. Recommendation and explanation generation
+
+These capabilities are supported by a secure authentication and account-management system.
 
 ---
 
-## Setup Steps
+# Core Features
 
-### Prerequisites
-*   Node.js (`v18+`)
-*   Python (`3.9+`)
-*   MongoDB Instance (Local OR Atlas)
+## 1. Cloud Cost Monitoring
 
-### 1. Database & Backend Configuration
-Navigate to the root directory and set up your Python environment:
+The dashboard provides users with a centralized interface for examining cloud expenditure.
 
-```bash
-# Create and activate a Virtual Environment
-python -m venv venv
-.\venv\Scripts\activate  # Windows
-# source venv/bin/activate  # macOS/Linux
+The monitoring layer is designed to provide:
 
-# Install Backend Dependencies
-pip install -r requirements.txt
+* Historical cost visualization
+* Cost trend analysis
+* Service-level cost information
+* Cost summaries
+* Interactive charts
+* Historical spending comparison
+* Dashboard-based cost monitoring
 
-# Start the FastAPI Server
-uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
+The visualization layer allows users to understand how expenditure changes over time rather than relying exclusively on raw billing records.
+
+---
+
+## 2. Anomaly Detection
+
+Cloud Autopilot includes an anomaly detection service for identifying unusual changes in cloud expenditure.
+
+The system analyzes historical cost information and identifies observations that significantly deviate from the expected spending pattern.
+
+Potential anomalies can represent situations such as:
+
+* Unexpected increases in cloud expenditure
+* Abnormal service consumption
+* Sudden changes in resource usage
+* Unusual billing patterns
+* Potential cloud resource inefficiencies
+
+Detected anomalies are surfaced through the application dashboard so that users can investigate the underlying cost behavior.
+
+---
+
+## 3. Cost Forecasting
+
+The platform includes a cost prediction service that estimates upcoming expenditure using historical cost information.
+
+The current implementation provides short-term forecasting capabilities, including seven-day cost predictions.
+
+
+The purpose of forecasting is to provide early visibility into potential cost increases and help users monitor spending before projected expenditure becomes a larger issue.
+
+---
+
+## 4. Cost Explanation and Recommendations
+
+Identifying an anomaly is only one part of effective cloud cost management.
+
+Cloud Autopilot includes a recommendation layer designed to translate detected cost behavior into understandable guidance.
+
+The system can provide recommendations related to areas such as:
+
+* Investigating unexpected cost increases
+* Reviewing resource utilization
+* Examining abnormal service consumption
+* Monitoring recurring spending patterns
+* Evaluating potential sources of cloud waste
+
+The recommendation system is intended to help users move from identifying a problem to understanding possible actions.
+
+# Authentication and Account Management
+
+Cloud Autopilot contains a complete authentication workflow for protecting user-specific application data.
+
+The authentication system includes:
+
+* User registration
+* Email verification using OTP
+* Secure password hashing
+* JWT-based authentication
+* Login
+* Logout
+* Protected application access
+* Password reset
+* Forgot-password workflow
+* Account settings
+* Password validation
+
+The password policy currently requires passwords to contain between 8 and 16 characters.
+
+The authentication architecture separates authentication logic from application services, allowing the system to maintain a modular backend structure.
+
+---
+
+# Email Verification
+
+New accounts use an OTP-based verification mechanism.
+
+The registration workflow is:
+
+```text
+User Registration
+       |
+       v
+Generate OTP
+       |
+       v
+Store OTP and Expiration
+       |
+       v
+Send Verification Email
+       |
+       v
+User Enters OTP
+       |
+       v
+Verify OTP
+       |
+       v
+Activate Account
 ```
 
-### 2. Frontend Configuration
-Open a new terminal window and navigate to the `frontend` folder:
+The email service is designed to support cloud deployment and includes fallback handling when email delivery is temporarily unavailable.
 
-```bash
-cd frontend
+OTP expiration and validation are handled by the backend.
 
-# Install Frontend Dependencies
-npm install
+---
 
-# Start the Vite Development Server
-npm run dev
+# Password Recovery
+
+The platform also provides an OTP-based password recovery mechanism.
+
+The password recovery workflow is:
+
+```text
+Forgot Password
+       |
+       v
+Enter Registered Email
+       |
+       v
+Generate Reset OTP
+       |
+       v
+Send Reset OTP
+       |
+       v
+Verify Reset OTP
+       |
+       v
+Create New Password
+       |
+       v
+Update Account
+       |
+       v
+Login
 ```
 
-##  Future Improvements
+Password reset requests are validated by the backend before modifying stored authentication credentials.
 
-- [ ] **AWS Cost Explorer API Integration**: Replace the algorithmic generation mock routes with direct AWS authenticated Boto3 endpoints.
-- [ ] **Push Alerts**: Direct integration with Slack/Discord webhooks to autonomously ping engineering teams on detection thresholds.
-- [ ] **Authentication Layer**: Introduce standard OAuth2 / JWT authentication to secure the frontend portal.
-- [ ] **PDF Reporting**: Add weekly PDF summary reporting outputs via cron jobs.
+---
+
+
+
+## Frontend
+
+| Technology   | Purpose                                 |
+| ------------ | --------------------------------------- |
+| React        | User interface development              |
+| TypeScript   | Type-safe frontend development          |
+| Vite         | Development and production build system |
+| Tailwind CSS | Responsive interface styling            |
+| Recharts     | Data visualization                      |
+| Lucide React | Interface icons                         |
+
+## Backend
+
+| Technology       | Purpose                          |
+| ---------------- | -------------------------------- |
+| Python           | Backend development              |
+| FastAPI          | REST API framework               |
+| Uvicorn          | ASGI application server          |
+| PyMongo          | MongoDB integration              |
+| JWT              | Authentication and authorization |
+| bcrypt / Passlib | Password hashing                 |
+
+## Data and Analytics
+
+| Technology / Method          | Purpose                    |
+| ---------------------------- | -------------------------- |
+| Python                       | Data processing            |
+| Statistical analysis         | Cost pattern analysis      |
+| Z-Score based analysis       | Anomaly detection          |
+| Regression-based forecasting | Short-term cost prediction |
+| Recommendation service       | Cost optimization guidance |
+
+## Infrastructure
+
+| Platform                | Purpose                      |
+| ----------------------- | ---------------------------- |
+| GitHub                  | Source code management       |
+| Netlify                 | Frontend deployment          |
+| Render                  | Backend deployment           |
+| MongoDB Atlas           | Cloud database               |
+| Resend / Email Provider | Transactional email delivery |
+
+---
+
+
+
+# API
+
+The FastAPI backend provides REST endpoints for application functionality.
+
+The backend also exposes interactive API documentation through FastAPI's OpenAPI interface.
+
+
+# Author
+
+## Bala Adithiya
+
+Computer Science Engineering student focused on cloud engineering, full-stack development, Python development, artificial intelligence, machine learning, and building practical software systems.
+
+GitHub:
+
+https://github.com/balaadithiya150805-cyber
+
+---
+
+## License
+
+This project is developed for educational, portfolio, research, and demonstration purposes.
